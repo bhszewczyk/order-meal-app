@@ -1,18 +1,38 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import styles from './HeaderCartBtn.module.css';
 import CartIcon from '../Cart/CartIcon';
 import CartContext from '../../store/cart-context';
 
 function HeaderCartBtn(props) {
-	const cartCtx = useContext(CartContext);
+	const [btnRefreshEnabled, setBtnRefreshEnabled] = useState(false);
 
-	const numberOfCartItems = cartCtx.items.reduce((curNum, item) => {
+	const cartCtx = useContext(CartContext);
+	const { items } = cartCtx;
+
+	const numberOfCartItems = items.reduce((curNum, item) => {
 		return curNum + item.amount;
 	}, 0);
 
+	const btnStyles = `${styles.button} ${btnRefreshEnabled ? styles.bump : ''}`;
+
+	useEffect(() => {
+		if (items.length === 0) {
+			return;
+		}
+		setBtnRefreshEnabled(true);
+
+		const timer = setTimeout(() => {
+			setBtnRefreshEnabled(false);
+		}, 300);
+
+		return () => {
+			clearTimeout(timer);
+		};
+	}, [items]);
+
 	return (
-		<button className={styles.button} onClick={props.onClick}>
+		<button className={btnStyles} onClick={props.onClick}>
 			<span className={styles.icon}>
 				<CartIcon />
 			</span>
